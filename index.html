@@ -1,12 +1,28 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="luxury">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Finance Demo · Dot.ai Codex Level 1</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Press+Start+2P&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      // Pick stored theme before paint to avoid flash
+      (function () {
+        try {
+          var t = localStorage.getItem("dotai-finance:theme");
+          if (t === "pixel" || t === "luxury") {
+            document.documentElement.setAttribute("data-theme", t);
+          }
+        } catch (_) {}
+      })();
+    </script>
   </head>
   <body class="bg-canvas text-ink font-sans">
     <div id="root"></div>

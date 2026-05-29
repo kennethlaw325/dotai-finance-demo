@@ -18,10 +18,10 @@ export function ReceiptEditor({
   saveLabel?: string;
 }) {
   return (
-    <div className="rounded-xl border border-brand/30 bg-brand/5 p-4">
+    <div className="border border-accent/40 bg-panel p-5">
       {title && (
-        <div className="flex items-center gap-2 text-brand text-sm font-medium mb-3">
-          <Sparkles className="size-4" />
+        <div className="flex items-center gap-2 text-accent text-[11px] uppercase tracking-[0.2em] mb-4">
+          <Sparkles className="size-3.5" />
           {title}
         </div>
       )}
@@ -98,30 +98,31 @@ export function ReceiptEditor({
               className="input"
             />
           </Field>
-          <label className="col-span-2 flex items-center gap-2 text-sm">
+          <label className="col-span-2 flex items-center gap-2 text-sm text-muted cursor-pointer">
             <input
               type="checkbox"
               checked={value.reimbursable}
               onChange={(e) =>
                 onChange({ ...value, reimbursable: e.target.checked })
               }
+              className="accent-accent"
             />
-            標記為公司報銷
+            <span className="uppercase tracking-[0.15em] text-[11px]">Mark as reimbursable</span>
           </label>
         </div>
       </div>
-      <div className="flex justify-end gap-2 mt-4">
+      <div className="flex justify-end gap-3 mt-5 pt-4 border-t border-line">
         <button
           onClick={onCancel}
-          className="px-3 py-1.5 rounded-lg text-muted hover:bg-canvas"
+          className="px-4 py-2 text-sm uppercase tracking-[0.15em] text-muted hover:text-ink transition-colors"
         >
-          取消
+          Cancel
         </button>
         <button
           onClick={onSave}
-          className="px-4 py-1.5 rounded-lg bg-brand text-white font-medium hover:bg-brand/90"
+          className="px-5 py-2 text-sm uppercase tracking-[0.15em] border border-accent text-accent hover:bg-accent hover:text-canvas transition-colors"
         >
-          {saveLabel ?? "儲存"}
+          {saveLabel ?? "Save"}
         </button>
       </div>
     </div>

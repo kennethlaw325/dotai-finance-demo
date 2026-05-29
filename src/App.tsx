@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { Receipt as ReceiptIcon, Building2, Target, Wallet, Settings as SettingsIcon } from "lucide-react";
 import type { Budget, Receipt } from "./types";
 import { loadBudgets, loadReceipts, saveBudgets, saveReceipts } from "./lib/storage";
+import { loadTheme, saveTheme, type ThemeKey } from "./lib/theme";
 import { ReceiptsView } from "./views/Receipts";
 import { ReimbursementsView } from "./views/Reimbursements";
 import { BudgetView } from "./views/Budget";
@@ -11,23 +11,32 @@ import { uid } from "./lib/utils";
 
 type ViewKey = "receipts" | "reimbursements" | "budget" | "settings";
 
-const NAV: { key: ViewKey; label: string; icon: typeof ReceiptIcon }[] = [
-  { key: "receipts", label: "收據", icon: ReceiptIcon },
-  { key: "reimbursements", label: "公司報銷", icon: Building2 },
-  { key: "budget", label: "預算", icon: Target },
-  { key: "settings", label: "設定", icon: SettingsIcon }
+const NAV: { key: ViewKey; label: string }[] = [
+  { key: "receipts", label: "Receipts" },
+  { key: "reimbursements", label: "Reimbursable" },
+  { key: "budget", label: "Budget" },
+  { key: "settings", label: "Settings" }
 ];
+
+const NAV_ZH: Record<ViewKey, string> = {
+  receipts: "收據",
+  reimbursements: "公司報銷",
+  budget: "預算",
+  settings: "設定"
+};
 
 export default function App() {
   const [view, setView] = useState<ViewKey>("receipts");
   const [receipts, setReceiptsState] = useState<Receipt[]>([]);
   const [budgets, setBudgetsState] = useState<Budget[]>([]);
   const [toasts, setToasts] = useState<ToastMsg[]>([]);
-  const [configVersion, setConfigVersion] = useState(0); // force ReceiptsView to re-read isMockMode()
+  const [configVersion, setConfigVersion] = useState(0);
+  const [theme, setTheme] = useState<ThemeKey>("luxury");
 
   useEffect(() => {
     setReceiptsState(loadReceipts());
     setBudgetsState(loadBudgets());
+    setTheme(loadTheme());
   }, []);
 
   function setReceipts(next: Receipt[]) {
@@ -45,30 +54,53 @@ export default function App() {
     setToasts((cur) => cur.filter((t) => t.id !== id));
   }, []);
 
+  function toggleTheme() {
+    const next: ThemeKey = theme === "luxury" ? "pixel" : "luxury";
+    setTheme(next);
+    saveTheme(next);
+  }
+
+  const isPixel = theme === "pixel";
+  const displayClass = isPixel
+    ? "font-display text-[10px] tracking-widest"
+    : "font-display text-xl tracking-tight";
+
   return (
     <div className="min-h-full flex flex-col">
-      <header className="border-b border-line bg-panel">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <div className="flex items-center gap-2 text-navy font-semibold">
-            <Wallet className="size-5" />
-            Finance Demo
+      <header className="border-b border-line">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8 pt-6 pb-4">
+          <div className="flex items-baseline justify-between gap-4">
+            <div>
+              <div className={`${displayClass} text-ink`}>
+                {isPixel ? "FINANCE.EXE" : "Finance Ledger"}
+              </div>
+              <div className="text-[11px] uppercase tracking-[0.2em] text-muted mt-1">
+                {isPixel ? "v0.1 · DOT.AI" : "Dot.ai · Codex Level 1"}
+              </div>
+            </div>
+            <button
+              onClick={toggleTheme}
+              title={isPixel ? "切去 Luxury theme" : "切去 Pixel theme"}
+              className="text-[11px] uppercase tracking-[0.2em] text-muted hover:text-accent transition-colors"
+            >
+              {isPixel ? "[ luxury ]" : "[ pixel ]"}
+            </button>
           </div>
-          <nav className="ml-auto flex items-center gap-1">
+          <nav className="mt-6 -mb-px flex items-end gap-6 overflow-x-auto">
             {NAV.map((n) => {
-              const Icon = n.icon;
               const active = view === n.key;
               return (
                 <button
                   key={n.key}
                   onClick={() => setView(n.key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                  className={`pb-3 text-sm tracking-wide whitespace-nowrap transition-colors ${
                     active
-                      ? "bg-brand text-white"
-                      : "text-muted hover:bg-canvas hover:text-ink"
+                      ? "text-ink border-b border-accent"
+                      : "text-muted hover:text-ink border-b border-transparent"
                   }`}
                 >
-                  <Icon className="size-4" />
                   <span className="hidden sm:inline">{n.label}</span>
+                  <span className="sm:hidden">{NAV_ZH[n.key]}</span>
                 </button>
               );
             })}
@@ -76,7 +108,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-5 sm:px-8 py-10">
         {view === "receipts" && (
           <ReceiptsView
             key={configVersion}
@@ -103,8 +135,10 @@ export default function App() {
         )}
       </main>
 
-      <footer className="border-t border-line py-3 text-center text-xs text-muted">
-        Dot.ai Codex Level 1 · Finance Demo · Vision OCR (BYOK)
+      <footer className="border-t border-line py-5">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8 text-[11px] uppercase tracking-[0.2em] text-muted">
+          Vision OCR · Bring your own key · Data lives in your browser
+        </div>
       </footer>
 
       <ToastStack toasts={toasts} onDismiss={dismissToast} />

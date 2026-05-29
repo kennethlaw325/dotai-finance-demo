@@ -61,28 +61,36 @@ export function SettingsView({
   const activePresetObj = PROVIDER_PRESETS.find((p) => p.label === activePreset);
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-10 max-w-2xl">
       <header>
-        <h2 className="text-2xl font-semibold">設定</h2>
-        <p className="text-muted text-sm mt-1">
-          配置 Vision API（OpenAI-compatible）。
+        <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
+          Section · 04
+        </div>
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
+          Settings
+        </h2>
+        <p className="text-muted text-sm mt-3 max-w-md leading-relaxed">
+          配置 Vision API（OpenAI-compatible schema）。Key 只存喺呢部機。
         </p>
       </header>
 
-      <section className="rounded-xl border border-line bg-panel p-5 space-y-4">
-        <div className="flex items-start gap-2 text-sm text-muted bg-canvas rounded-lg p-3">
-          <KeyRound className="size-4 mt-0.5 shrink-0 text-brand" />
-          <div>
-            <div className="font-medium text-ink">Bring Your Own Key（BYOK）</div>
+      <section className="space-y-8">
+        <div className="flex items-start gap-3 border-l border-accent pl-4">
+          <KeyRound className="size-4 mt-1 shrink-0 text-accent" />
+          <div className="text-sm text-muted leading-relaxed">
+            <div className="text-[11px] uppercase tracking-[0.2em] text-accent">
+              Bring your own key
+            </div>
             <p className="mt-1">
-              API key 只存喺你個 browser LocalStorage，唔會 send 去任何 server，
-              亦唔會跟 deploy 出去。冇 key 就走 mock mode（5 個 sample 收據）。
+              API key 只存喺你個 browser LocalStorage，唔會 send 去任何 server，亦唔會跟 deploy 出去。冇 key 就走 mock mode（5 個 sample 收據）。
             </p>
           </div>
         </div>
 
         <div>
-          <div className="text-xs text-muted mb-2">快速 preset（揀一個自動填 base URL + model）</div>
+          <div className="text-[11px] uppercase tracking-[0.25em] text-muted mb-3">
+            Provider preset
+          </div>
           <div className="flex flex-wrap gap-2">
             {PROVIDER_PRESETS.map((p) => {
               const active = activePreset === p.label;
@@ -90,10 +98,10 @@ export function SettingsView({
                 <button
                   key={p.label}
                   onClick={() => applyPreset(p)}
-                  className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition ${
+                  className={`px-4 py-2 border text-sm uppercase tracking-[0.1em] transition-colors ${
                     active
-                      ? "border-brand bg-brand/10 text-brand"
-                      : "border-line bg-panel text-ink hover:bg-canvas"
+                      ? "border-accent text-accent"
+                      : "border-line text-muted hover:text-ink hover:border-ink"
                   }`}
                 >
                   {p.label}
@@ -102,26 +110,28 @@ export function SettingsView({
             })}
           </div>
           {activePresetObj && (
-            <p className="text-xs text-muted mt-2">
+            <p className="text-xs text-muted mt-3 leading-relaxed">
               {activePresetObj.note}
               {" · "}
               <a
                 href={activePresetObj.helpUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-brand hover:underline"
+                className="inline-flex items-center gap-1 text-accent hover:underline uppercase tracking-[0.15em]"
               >
-                攞 key
+                Get key
                 <ExternalLink className="size-3" />
               </a>
             </p>
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-5">
           <label className="block">
-            <span className="text-xs text-muted">API Key</span>
-            <div className="flex gap-2 mt-1">
+            <span className="text-[11px] uppercase tracking-[0.25em] text-muted">
+              API key
+            </span>
+            <div className="flex gap-2 mt-2">
               <input
                 type={show ? "text" : "password"}
                 value={apiKey}
@@ -132,15 +142,17 @@ export function SettingsView({
               <button
                 type="button"
                 onClick={() => setShow((s) => !s)}
-                className="px-3 rounded-md border border-line text-sm text-muted hover:bg-canvas"
+                className="px-4 border border-line text-[11px] uppercase tracking-[0.15em] text-muted hover:text-ink hover:border-ink transition-colors"
               >
-                {show ? "隱藏" : "顯示"}
+                {show ? "Hide" : "Show"}
               </button>
             </div>
           </label>
 
           <label className="block">
-            <span className="text-xs text-muted">Base URL</span>
+            <span className="text-[11px] uppercase tracking-[0.25em] text-muted">
+              Base URL
+            </span>
             <input
               type="text"
               value={baseUrl}
@@ -149,12 +161,14 @@ export function SettingsView({
                 setActivePreset(null);
               }}
               placeholder="https://api.openai.com/v1"
-              className="input w-full mt-1 font-mono text-sm"
+              className="input w-full mt-2 font-mono text-sm"
             />
           </label>
 
           <label className="block">
-            <span className="text-xs text-muted">Model</span>
+            <span className="text-[11px] uppercase tracking-[0.25em] text-muted">
+              Model
+            </span>
             <input
               type="text"
               value={model}
@@ -163,35 +177,37 @@ export function SettingsView({
                 setActivePreset(null);
               }}
               placeholder="gpt-4o-mini"
-              className="input w-full mt-1 font-mono text-sm"
+              className="input w-full mt-2 font-mono text-sm"
             />
           </label>
         </div>
 
-        <div className="flex justify-between pt-2">
+        <div className="flex justify-between pt-4 border-t border-line">
           <button
             onClick={clear}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-danger hover:bg-danger/5"
+            className="flex items-center gap-1.5 px-3 py-2 text-[11px] uppercase tracking-[0.15em] text-danger hover:opacity-80 transition-opacity"
           >
-            <Trash2 className="size-4" />
-            清除設定
+            <Trash2 className="size-3.5" />
+            Clear
           </button>
           <button
             onClick={save}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-brand text-white font-medium hover:bg-brand/90"
+            className="flex items-center gap-2 px-5 py-2 border border-accent text-accent text-sm uppercase tracking-[0.15em] hover:bg-accent hover:text-canvas transition-colors"
           >
             <Save className="size-4" />
-            儲存
+            Save
           </button>
         </div>
       </section>
 
-      <section className="rounded-xl border border-line bg-panel p-5 text-sm space-y-2">
-        <h3 className="font-semibold">資料隱私</h3>
-        <ul className="list-disc pl-5 text-muted space-y-1">
-          <li>所有收據圖片、欄位、預算、API key 100% 存喺你 browser LocalStorage</li>
-          <li>唯一 outbound：送圖去你 configured Vision API endpoint 解析</li>
-          <li>清 browser data = 全部清除</li>
+      <section className="border-t border-line pt-6">
+        <div className="text-[11px] uppercase tracking-[0.25em] text-muted mb-3">
+          Privacy
+        </div>
+        <ul className="text-sm text-muted space-y-2 leading-relaxed">
+          <li>· 所有收據圖、欄位、預算、API key 100% 存喺呢部機 LocalStorage</li>
+          <li>· 唯一 outbound：送圖去你 configured Vision API endpoint 解析</li>
+          <li>· 清 browser data = 全部清除</li>
         </ul>
       </section>
     </div>

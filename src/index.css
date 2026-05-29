@@ -2,12 +2,133 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------- Luxury theme (default) ----------
+   Inspired by private-banking interfaces: deep evergreen ground,
+   warm off-white text, restrained gold accent, oxblood for danger.
+*/
+:root,
+:root[data-theme="luxury"] {
+  --c-canvas: #0d1f1a;
+  --c-panel: #122922;
+  --c-line: #1f3a31;
+  --c-ink: #f0ead6;
+  --c-muted: #9fb0a6;
+  --c-brand: #c8a667;
+  --c-accent: #c8a667;
+  --c-success: #6fae6a;
+  --c-warn: #d4a55a;
+  --c-danger: #b04848;
+
+  --f-display: "Fraunces", "Cormorant Garamond", "Times New Roman", serif;
+  --f-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --r-sm: 2px;
+  --r-md: 4px;
+  --r-lg: 6px;
+  --r-xl: 10px;
+  --r-2xl: 14px;
+  --r-full: 9999px;
+}
+
+/* ---------- Pixel theme ----------
+   8-bit CRT homage: phosphor amber on near-black, monospace bitmap
+   fonts, hard-edge pixelated borders via box-shadow stacking, zero
+   border-radius. Reads like a retro DOS finance program.
+*/
+:root[data-theme="pixel"] {
+  --c-canvas: #0a0d09;
+  --c-panel: #131713;
+  --c-line: #2a3a2a;
+  --c-ink: #b8e07a;
+  --c-muted: #5e8a4f;
+  --c-brand: #ffb000;
+  --c-accent: #ffb000;
+  --c-success: #4ade80;
+  --c-warn: #ffb000;
+  --c-danger: #ff5555;
+
+  --f-display: "Press Start 2P", "Courier New", monospace;
+  --f-body: "VT323", "Courier New", monospace;
+  --f-mono: "VT323", "Courier New", monospace;
+
+  --r-sm: 0;
+  --r-md: 0;
+  --r-lg: 0;
+  --r-xl: 0;
+  --r-2xl: 0;
+  --r-full: 0;
+}
+
 html, body, #root { height: 100%; }
-body { -webkit-font-smoothing: antialiased; }
+body {
+  background: var(--c-canvas);
+  color: var(--c-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Pixel theme global tweaks */
+:root[data-theme="pixel"] body {
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  image-rendering: pixelated;
+}
+
+:root[data-theme="pixel"] * {
+  border-radius: 0 !important;
+  text-shadow: 0 0 1px currentColor;
+}
+
+/* Subtle CRT scanlines on pixel theme */
+:root[data-theme="pixel"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 3px
+  );
+  z-index: 100;
+}
+
+/* Larger body type for VT323 readability */
+:root[data-theme="pixel"] body {
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
 
 @layer components {
   .input {
-    @apply rounded-md border border-line bg-panel px-2.5 py-1.5 text-sm
-           focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand;
+    @apply border bg-panel px-3 py-2 text-sm
+           focus:outline-none transition-colors;
+    border-color: var(--c-line);
+    color: var(--c-ink);
+  }
+  .input:focus {
+    border-color: var(--c-accent);
+    box-shadow: 0 0 0 1px var(--c-accent);
+  }
+  .input::placeholder {
+    color: var(--c-muted);
+  }
+
+  /* Pixel-art frame: stacked box-shadows fake a chunky 4-px bevel */
+  :root[data-theme="pixel"] .pixel-frame {
+    box-shadow:
+      0 -4px 0 0 var(--c-line),
+      4px 0 0 0 var(--c-line),
+      0 4px 0 0 var(--c-line),
+      -4px 0 0 0 var(--c-line);
+  }
+
+  /* Luxury accent rule used under section headings */
+  .rule-accent {
+    height: 1px;
+    background: var(--c-accent);
+    width: 32px;
   }
 }

@@ -35,20 +35,20 @@ function Toast({ toast, onDismiss }: { toast: ToastMsg; onDismiss: () => void })
 
   const tone =
     toast.kind === "success"
-      ? "bg-success/10 border-success/40 text-success"
+      ? "border-l-success text-success"
       : toast.kind === "warn"
-      ? "bg-warn/10 border-warn/40 text-warn"
-      : "bg-danger/10 border-danger/40 text-danger";
+      ? "border-l-warn text-warn"
+      : "border-l-danger text-danger";
 
   const Icon = toast.kind === "success" ? CheckCircle2 : AlertTriangle;
 
   return (
     <div
-      className={`flex items-start gap-2 rounded-lg border px-3 py-2 shadow-sm backdrop-blur ${tone}`}
+      className={`flex items-start gap-2 bg-panel border border-line border-l-2 ${tone} px-3 py-2`}
     >
       <Icon className="size-4 shrink-0 mt-0.5" />
-      <span className="text-sm flex-1">{toast.text}</span>
-      <button onClick={onDismiss} className="opacity-60 hover:opacity-100">
+      <span className="text-sm flex-1 text-ink">{toast.text}</span>
+      <button onClick={onDismiss} className="opacity-60 hover:opacity-100 text-muted">
         <X className="size-3.5" />
       </button>
     </div>

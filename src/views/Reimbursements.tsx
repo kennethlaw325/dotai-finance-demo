@@ -48,63 +48,93 @@ export function ReimbursementsView({ receipts }: { receipts: Receipt[] }) {
   }
 
   return (
-    <div className="space-y-6">
-      <header className="flex items-end justify-between gap-4 flex-wrap">
+    <div className="space-y-10">
+      <header className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
-          <h2 className="text-2xl font-semibold">公司報銷</h2>
-          <p className="text-muted text-sm mt-1">本月待報銷總額（按貨幣分組）</p>
-          <div className="flex flex-wrap gap-x-6 gap-y-1 mt-2">
-            {monthTotals.length === 0 ? (
-              <span className="text-muted text-sm">本月無</span>
-            ) : (
-              monthTotals.map(([cur, total]) => (
-                <div key={cur} className="text-xl font-bold text-brand font-mono">
-                  {fmtMoney(total, cur)}
-                </div>
-              ))
-            )}
+          <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
+            Section · 02
           </div>
+          <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
+            Reimbursable
+          </h2>
+          <p className="text-muted text-sm mt-3 max-w-md leading-relaxed">
+            本月待報銷總額，按貨幣分組以避免換匯誤導。CSV 可直接交財務。
+          </p>
         </div>
         <button
           onClick={exportCsv}
           disabled={items.length === 0}
-          className="flex items-center gap-2 rounded-lg border border-line bg-panel px-4 py-2 font-medium hover:bg-canvas disabled:opacity-40"
+          className="flex items-center gap-2 border border-line text-muted px-4 py-2.5 text-sm uppercase tracking-[0.15em] hover:text-ink hover:border-ink disabled:opacity-40 transition-colors"
         >
           <Download className="size-4" />
-          匯出 CSV
+          Export CSV
         </button>
       </header>
 
-      {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-line p-8 text-center text-muted">
-          未有標記為報銷的收據。喺「收據」頁面勾選「公司報銷」即可。
+      <section>
+        <div className="text-[11px] uppercase tracking-[0.25em] text-muted mb-4">
+          This month
         </div>
-      ) : (
-        <div className="rounded-xl border border-line bg-panel overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-canvas text-muted text-xs uppercase tracking-wider">
-              <tr>
-                <th className="text-left px-4 py-2">日期</th>
-                <th className="text-left px-4 py-2">商戶</th>
-                <th className="text-left px-4 py-2">分類</th>
-                <th className="text-right px-4 py-2">金額</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {items.map((r) => (
-                <tr key={r.id}>
-                  <td className="px-4 py-2">{r.date}</td>
-                  <td className="px-4 py-2 font-medium">{r.merchant}</td>
-                  <td className="px-4 py-2 text-muted">{r.category}</td>
-                  <td className="px-4 py-2 text-right font-mono">
+        {monthTotals.length === 0 ? (
+          <div className="font-display text-2xl text-muted">— Nil —</div>
+        ) : (
+          <div className="grid gap-x-10 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+            {monthTotals.map(([cur, total]) => (
+              <div key={cur} className="border-t border-line pt-3">
+                <div className="text-[11px] uppercase tracking-[0.2em] text-muted">
+                  {cur}
+                </div>
+                <div className="font-display text-3xl text-ink mt-1 tabular-nums">
+                  {fmtMoney(total, cur)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <div className="flex items-baseline justify-between border-b border-line pb-2 mb-1">
+          <h3 className="text-[11px] uppercase tracking-[0.25em] text-muted">
+            All entries
+          </h3>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-muted font-mono">
+            {String(items.length).padStart(3, "0")}
+          </span>
+        </div>
+        {items.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="font-display text-2xl text-muted">No reimbursable entries</div>
+            <p className="text-sm text-muted mt-3 max-w-sm mx-auto leading-relaxed">
+              喺「收據」頁勾選「Mark as reimbursable」即可入呢度。
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-line">
+            {items.map((r) => (
+              <li key={r.id} className="grid grid-cols-[1fr_auto] gap-4 py-4 items-baseline">
+                <div className="min-w-0">
+                  <div className="font-display text-lg text-ink truncate">
+                    {r.merchant}
+                  </div>
+                  <div className="text-xs text-muted mt-1 font-mono">
+                    {r.date}
+                    <span className="ml-3 uppercase tracking-[0.15em]">{r.category}</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-mono text-base text-ink tabular-nums">
                     {fmtMoney(r.amount, r.currency)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted">
+                    {r.currency}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

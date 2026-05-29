@@ -29,67 +29,62 @@ export function BudgetView({ receipts, budgets, setBudgets }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <header>
-        <h2 className="text-2xl font-semibold">預算</h2>
-        <p className="text-muted text-sm mt-1">
-          設定每月分類預算（HKD）。超 80% 黃燈，超 100% 紅燈 + Toast 提示。
-        </p>
-        <p className="text-xs text-muted mt-1">
-          注：預算計算暫不換匯，直接相加金額。多幣種混合時數字僅供 demo 參考。
+        <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
+          Section · 03
+        </div>
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
+          Budget
+        </h2>
+        <p className="text-muted text-sm mt-3 max-w-md leading-relaxed">
+          設定每月分類上限（HKD 基準）。80% 警示，100% 觸發 toast。多幣種混合時數字僅供參考。
         </p>
       </header>
 
-      <div className="space-y-3">
+      <ul className="divide-y divide-line">
         {CATEGORIES.map((cat) => {
           const b = budgets.find((x) => x.category === cat);
           const limit = b?.monthlyLimit ?? 0;
           const used = spent.get(cat) ?? 0;
           const ratio = limit > 0 ? used / limit : 0;
-          const color =
-            ratio >= 1
-              ? "bg-danger"
-              : ratio >= 0.8
-              ? "bg-warn"
-              : "bg-success";
+          const tone =
+            ratio >= 1 ? "bg-danger" : ratio >= 0.8 ? "bg-warn" : "bg-accent";
           return (
-            <div
-              key={cat}
-              className="rounded-xl border border-line bg-panel p-4"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium">{cat}</span>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted">月度上限</span>
+            <li key={cat} className="py-5">
+              <div className="flex items-baseline justify-between mb-3 gap-4">
+                <span className="font-display text-lg text-ink">{cat}</span>
+                <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted">
+                  <span>Monthly</span>
                   <input
                     type="number"
                     min={0}
                     step={100}
                     value={limit || ""}
-                    placeholder="未設"
+                    placeholder="—"
                     onChange={(e) => setLimit(cat, Number(e.target.value))}
-                    className="input w-28 text-right"
+                    className="input w-28 text-right font-mono tracking-normal text-sm"
                   />
                 </div>
               </div>
-              <div className="h-2 rounded-full bg-canvas overflow-hidden">
+              <div className="h-px bg-line overflow-hidden">
                 <div
-                  className={`h-full ${color} transition-all`}
+                  className={`h-full ${tone} transition-all`}
                   style={{ width: `${Math.min(ratio, 1) * 100}%` }}
                 />
               </div>
-              <div className="flex justify-between text-xs text-muted mt-1.5 font-mono">
-                <span>{fmtMoney(used, "HKD")} 已用</span>
+              <div className="flex justify-between text-[11px] uppercase tracking-[0.15em] text-muted mt-2 font-mono">
+                <span>{fmtMoney(used, "HKD")} used</span>
                 <span>
                   {limit > 0
-                    ? `${Math.round(ratio * 100)}% · 剩 ${fmtMoney(Math.max(limit - used, 0), "HKD")}`
-                    : "未設預算"}
+                    ? `${Math.round(ratio * 100)}% · ${fmtMoney(Math.max(limit - used, 0), "HKD")} left`
+                    : "no limit set"}
                 </span>
               </div>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }

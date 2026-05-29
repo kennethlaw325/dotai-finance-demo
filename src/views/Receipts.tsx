@@ -158,48 +158,53 @@ export function ReceiptsView({
   }
 
   return (
-    <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="space-y-10">
+      <header className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
-          <h2 className="text-2xl font-semibold">收據</h2>
-          <p className="text-muted text-sm mt-1">
-            拍張單據，AI 自動入賬
-            {isMockMode() && (
-              <button
-                onClick={onGoToSettings}
-                className="ml-2 px-2 py-0.5 rounded bg-warn/10 text-warn text-xs hover:bg-warn/20"
-              >
-                Demo mock 模式 · 點此入 API key
-              </button>
-            )}
+          <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
+            Section · 01
+          </div>
+          <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
+            Receipts
+          </h2>
+          <p className="text-muted text-sm mt-3 max-w-md leading-relaxed">
+            上傳一張收據，AI 即時解析金額、商戶、貨幣同分類。所有資料留喺呢部機。
           </p>
+          {isMockMode() && (
+            <button
+              onClick={onGoToSettings}
+              className="mt-3 text-[11px] uppercase tracking-[0.2em] text-warn hover:text-accent transition-colors"
+            >
+              · Mock mode · 加 API key →
+            </button>
+          )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={busy}
-            className="flex items-center gap-2 rounded-lg bg-brand text-white px-4 py-2 font-medium disabled:opacity-50 hover:bg-brand/90"
+            className="flex items-center gap-2 border border-accent text-accent px-5 py-2.5 text-sm uppercase tracking-[0.15em] hover:bg-accent hover:text-canvas disabled:opacity-50 transition-colors"
           >
             {busy && !batch ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                AI 解析中…
+                解析中
               </>
             ) : (
               <>
                 <Camera className="size-4" />
-                上傳單據
+                Upload
               </>
             )}
           </button>
           <button
             onClick={() => folderInputRef.current?.click()}
             disabled={busy}
-            title="揀整個 folder 入面所有圖（適合一次過 import 一個月）"
-            className="flex items-center gap-2 rounded-lg border border-line bg-panel px-3 py-2 text-sm font-medium disabled:opacity-50 hover:bg-canvas"
+            title="揀整個 folder 入面所有圖"
+            className="flex items-center gap-2 border border-line text-muted px-4 py-2.5 text-sm uppercase tracking-[0.15em] hover:text-ink hover:border-ink disabled:opacity-40 transition-colors"
           >
             <FolderOpen className="size-4" />
-            選資料夾
+            Folder
           </button>
         </div>
         <input
@@ -227,17 +232,22 @@ export function ReceiptsView({
       </header>
 
       {batch && (
-        <div className="rounded-xl border border-brand/30 bg-brand/5 p-4">
-          <div className="flex items-center gap-2 text-brand text-sm font-medium mb-2">
-            <Loader2 className="size-4 animate-spin" />
-            Batch 解析中：{batch.done} / {batch.total}
-            {batch.fail > 0 && (
-              <span className="text-danger ml-2">（{batch.fail} 失敗）</span>
-            )}
+        <div className="border-y border-accent/40 py-4">
+          <div className="flex items-baseline justify-between text-[11px] uppercase tracking-[0.2em] text-accent mb-2">
+            <span className="flex items-center gap-2">
+              <Loader2 className="size-3 animate-spin" />
+              Batch parsing
+            </span>
+            <span className="font-mono">
+              {String(batch.done).padStart(2, "0")} / {String(batch.total).padStart(2, "0")}
+              {batch.fail > 0 && (
+                <span className="text-danger ml-2">· {batch.fail} fail</span>
+              )}
+            </span>
           </div>
-          <div className="h-2 rounded-full bg-canvas overflow-hidden">
+          <div className="h-px bg-line overflow-hidden">
             <div
-              className="h-full bg-brand transition-all"
+              className="h-full bg-accent transition-all"
               style={{ width: `${(batch.done / batch.total) * 100}%` }}
             />
           </div>
@@ -267,57 +277,78 @@ export function ReceiptsView({
       )}
 
       <section>
-        <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
-          歷史 ({receipts.length})
-        </h3>
+        <div className="flex items-baseline justify-between border-b border-line pb-2 mb-1">
+          <h3 className="text-[11px] uppercase tracking-[0.25em] text-muted">
+            Ledger
+          </h3>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-muted font-mono">
+            {String(receipts.length).padStart(3, "0")} entries
+          </span>
+        </div>
         {receipts.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-line p-8 text-center text-muted">
-            未有收據，按右上「上傳單據」開始。
+          <div className="py-16 text-center">
+            <div className="font-display text-2xl text-muted">
+              No receipts yet
+            </div>
+            <p className="text-sm text-muted mt-3 max-w-sm mx-auto leading-relaxed">
+              上傳第一張單據，AI 會即場解析。多張可以一次過上傳成個 folder。
+            </p>
           </div>
         ) : (
-          <div className="divide-y divide-line rounded-xl border border-line bg-panel">
+          <ul className="divide-y divide-line">
             {receipts.map((r) => (
-              <div key={r.id} className="flex items-center gap-3 px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium truncate">{r.merchant}</span>
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-canvas text-muted">
+              <li
+                key={r.id}
+                className="group grid grid-cols-[1fr_auto] gap-4 py-4 items-baseline"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="font-display text-lg text-ink truncate">
+                      {r.merchant}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-muted">
                       {r.category}
                     </span>
                     {r.reimbursable && (
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-brand/10 text-brand">
-                        報銷
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-accent">
+                        · reimbursable
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-muted mt-0.5">
+                  <div className="text-xs text-muted mt-1 font-mono">
                     {r.date}
-                    {r.note && <span className="ml-2">· {r.note}</span>}
+                    {r.note && <span className="ml-3">· {r.note}</span>}
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-mono font-semibold">
-                    {fmtMoney(r.amount, r.currency)}
+                <div className="flex items-baseline gap-4">
+                  <div className="text-right">
+                    <div className="font-mono text-base text-ink tabular-nums">
+                      {fmtMoney(r.amount, r.currency)}
+                    </div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-muted">
+                      {r.currency}
+                    </div>
                   </div>
-                  <div className="text-[10px] text-muted uppercase">{r.currency}</div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setEditing(r)}
+                      className="text-muted hover:text-accent p-1"
+                      title="編輯"
+                    >
+                      <Pencil className="size-3.5" />
+                    </button>
+                    <button
+                      onClick={() => deleteReceipt(r.id)}
+                      className="text-muted hover:text-danger p-1"
+                      title="刪除"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => setEditing(r)}
-                  className="text-muted hover:text-brand p-1"
-                  title="編輯"
-                >
-                  <Pencil className="size-4" />
-                </button>
-                <button
-                  onClick={() => deleteReceipt(r.id)}
-                  className="text-muted hover:text-danger p-1"
-                  title="刪除"
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </section>
     </div>
