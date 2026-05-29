@@ -207,7 +207,9 @@ export function ReceiptsView({
           type="file"
           accept="image/*"
           multiple
-          capture="environment"
+          // No `capture` attribute — mobile users still get the native
+          // "Take Photo / Photo Library / Choose File" picker via accept;
+          // forcing camera blocks them from picking existing photos.
           onChange={onPick}
           className="hidden"
         />

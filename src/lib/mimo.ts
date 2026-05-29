@@ -126,6 +126,8 @@ const MOCK_SAMPLES: ExtractedReceipt[] = [
   { amount: 168, currency: "CNY", merchant: "盒馬鮮生", date: today(), category: "購物" }
 ];
 
+// Module-level so the mock cycles through samples across successive calls
+// (rather than always returning the first sample).
 let mockCursor = 0;
 
 async function mockExtract(): Promise<ExtractedReceipt> {

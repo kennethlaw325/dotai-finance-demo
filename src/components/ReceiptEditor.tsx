@@ -25,7 +25,11 @@ export function ReceiptEditor({
           {title}
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4">
+      <div
+        className={`grid gap-4 ${
+          value.imageDataUrl ? "grid-cols-1 md:grid-cols-[120px_1fr]" : "grid-cols-1"
+        }`}
+      >
         {value.imageDataUrl && (
           <img
             src={value.imageDataUrl}
