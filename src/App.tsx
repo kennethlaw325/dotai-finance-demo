@@ -82,17 +82,17 @@ export default function App() {
     <div className="min-h-full flex flex-col">
       <header className="border-b border-line relative">
         <div className="max-w-3xl mx-auto px-5 sm:px-8 pt-6 pb-4 text-center">
-          <div className="absolute right-5 sm:right-8 top-6 flex items-center gap-px border border-line">
+          <div className="absolute right-5 sm:right-8 top-6 flex items-center border border-accent overflow-hidden">
             {THEME_KEYS.map((k) => {
               const active = theme === k;
               return (
                 <button
                   key={k}
                   onClick={() => pickTheme(k)}
-                  className={`px-2 py-1 text-[10px] uppercase tracking-[0.15em] transition-colors ${
+                  className={`px-2.5 py-1 text-[10px] uppercase tracking-[0.15em] transition-colors border-r border-accent last:border-r-0 ${
                     active
-                      ? "bg-accent text-canvas"
-                      : "text-muted hover:text-ink"
+                      ? "bg-accent text-canvas font-medium"
+                      : "bg-panel text-ink hover:bg-canvas"
                   }`}
                   title={`切去 ${THEME_LABELS[k]} theme`}
                 >
