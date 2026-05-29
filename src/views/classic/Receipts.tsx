@@ -157,28 +157,22 @@ export function ReceiptsView({
     if (editing?.id === id) setEditing(null);
   }
 
+  const mocked = isMockMode();
+  const uploadDisabled = busy || mocked;
+
   return (
     <div className="space-y-6">
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-2xl font-semibold">收據</h2>
-          <p className="text-muted text-sm mt-1">
-            拍張單據，AI 自動入賬
-            {isMockMode() && (
-              <button
-                onClick={onGoToSettings}
-                className="ml-2 px-2 py-0.5 rounded bg-warn/10 text-warn text-xs hover:bg-warn/20"
-              >
-                Demo mock 模式 · 點此入 API key
-              </button>
-            )}
-          </p>
+          <p className="text-muted text-sm mt-1">拍張單據，AI 自動入賬</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => fileInputRef.current?.click()}
-            disabled={busy}
-            className="flex items-center gap-2 rounded-lg bg-brand text-white px-4 py-2 font-medium disabled:opacity-50 hover:bg-brand/90"
+            disabled={uploadDisabled}
+            title={mocked ? "請先去 Settings 入 API key" : ""}
+            className="flex items-center gap-2 rounded-lg bg-brand text-white px-4 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand/90"
           >
             {busy && !batch ? (
               <>
@@ -194,9 +188,9 @@ export function ReceiptsView({
           </button>
           <button
             onClick={() => folderInputRef.current?.click()}
-            disabled={busy}
-            title="揀整個 folder 入面所有圖（適合一次過 import 一個月）"
-            className="flex items-center gap-2 rounded-lg border border-line bg-panel px-3 py-2 text-sm font-medium disabled:opacity-50 hover:bg-canvas"
+            disabled={uploadDisabled}
+            title={mocked ? "請先去 Settings 入 API key" : "揀整個 folder 入面所有圖（適合一次過 import 一個月）"}
+            className="flex items-center gap-2 rounded-lg border border-line bg-panel px-3 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-canvas"
           >
             <FolderOpen className="size-4" />
             選資料夾
@@ -225,6 +219,24 @@ export function ReceiptsView({
           className="hidden"
         />
       </header>
+
+      {mocked && (
+        <div className="rounded-lg border border-warn/40 bg-warn/5 px-4 py-3 flex items-start gap-3">
+          <div className="text-warn text-lg leading-none mt-0.5">⚠</div>
+          <div className="flex-1 text-sm">
+            <div className="font-medium text-ink">未配置 Vision API key — 上傳已停用</div>
+            <p className="text-muted text-xs mt-1 leading-relaxed">
+              冇 key 就冇得真實解析。請去 Settings 入 OpenAI / MiMo / OpenRouter 其中一個 provider 嘅 API key（key 只存喺呢部機）。
+            </p>
+          </div>
+          <button
+            onClick={onGoToSettings}
+            className="shrink-0 px-3 py-1.5 rounded-md bg-warn text-white text-xs font-medium hover:opacity-90"
+          >
+            去 Settings →
+          </button>
+        </div>
+      )}
 
       {batch && (
         <div className="rounded-xl border border-brand/30 bg-brand/5 p-4">
