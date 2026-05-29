@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { -webkit-font-smoothing: antialiased; }
+
+@layer components {
+  .input {
+    @apply rounded-md border border-line bg-panel px-2.5 py-1.5 text-sm
+           focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand;
+  }
+}
