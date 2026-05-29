@@ -1,27 +1,29 @@
 import { useMemo } from "react";
 import { Download } from "lucide-react";
-import type { Receipt } from "../types";
-import { fmtHKD, isInCurrentMonth } from "../lib/utils";
+import type { Currency, Receipt } from "../types";
+import { fmtMoney, isInCurrentMonth } from "../lib/utils";
 
 export function ReimbursementsView({ receipts }: { receipts: Receipt[] }) {
   const items = useMemo(
     () => receipts.filter((r) => r.reimbursable),
     [receipts]
   );
-  const monthTotal = useMemo(
-    () =>
-      items
-        .filter((r) => isInCurrentMonth(r.date))
-        .reduce((s, r) => s + r.amount, 0),
-    [items]
-  );
+
+  const monthTotals = useMemo(() => {
+    const map = new Map<Currency, number>();
+    for (const r of items) {
+      if (!isInCurrentMonth(r.date)) continue;
+      map.set(r.currency, (map.get(r.currency) ?? 0) + r.amount);
+    }
+    return [...map.entries()];
+  }, [items]);
 
   function exportCsv() {
-    const header = "date,merchant,category,amount,note\n";
+    const header = "date,merchant,category,currency,amount,note\n";
     const rows = items
       .map(
         (r) =>
-          `${r.date},"${r.merchant.replace(/"/g, '""')}",${r.category},${r.amount},"${(r.note ?? "").replace(/"/g, '""')}"`
+          `${r.date},"${r.merchant.replace(/"/g, '""')}",${r.category},${r.currency},${r.amount},"${(r.note ?? "").replace(/"/g, '""')}"`
       )
       .join("\n");
     const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8" });
@@ -35,12 +37,20 @@ export function ReimbursementsView({ receipts }: { receipts: Receipt[] }) {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-end justify-between">
+      <header className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-2xl font-semibold">公司報銷</h2>
-          <p className="text-muted text-sm mt-1">本月待報銷總額</p>
-          <div className="text-3xl font-bold text-brand mt-2 font-mono">
-            {fmtHKD(monthTotal)}
+          <p className="text-muted text-sm mt-1">本月待報銷總額（按貨幣分組）</p>
+          <div className="flex flex-wrap gap-x-6 gap-y-1 mt-2">
+            {monthTotals.length === 0 ? (
+              <span className="text-muted text-sm">本月無</span>
+            ) : (
+              monthTotals.map(([cur, total]) => (
+                <div key={cur} className="text-xl font-bold text-brand font-mono">
+                  {fmtMoney(total, cur)}
+                </div>
+              ))
+            )}
           </div>
         </div>
         <button
@@ -75,7 +85,7 @@ export function ReimbursementsView({ receipts }: { receipts: Receipt[] }) {
                   <td className="px-4 py-2 font-medium">{r.merchant}</td>
                   <td className="px-4 py-2 text-muted">{r.category}</td>
                   <td className="px-4 py-2 text-right font-mono">
-                    {fmtHKD(r.amount)}
+                    {fmtMoney(r.amount, r.currency)}
                   </td>
                 </tr>
               ))}

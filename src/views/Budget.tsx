@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { Budget, Category, Receipt } from "../types";
 import { CATEGORIES } from "../types";
-import { fmtHKD, isInCurrentMonth } from "../lib/utils";
+import { fmtMoney, isInCurrentMonth } from "../lib/utils";
 
 interface Props {
   receipts: Receipt[];
@@ -33,7 +33,10 @@ export function BudgetView({ receipts, budgets, setBudgets }: Props) {
       <header>
         <h2 className="text-2xl font-semibold">預算</h2>
         <p className="text-muted text-sm mt-1">
-          設定每月分類預算。超 80% 黃燈，超 100% 紅燈 + Toast 提示。
+          設定每月分類預算（HKD）。超 80% 黃燈，超 100% 紅燈 + Toast 提示。
+        </p>
+        <p className="text-xs text-muted mt-1">
+          注：預算計算暫不換匯，直接相加金額。多幣種混合時數字僅供 demo 參考。
         </p>
       </header>
 
@@ -76,10 +79,10 @@ export function BudgetView({ receipts, budgets, setBudgets }: Props) {
                 />
               </div>
               <div className="flex justify-between text-xs text-muted mt-1.5 font-mono">
-                <span>{fmtHKD(used)} 已用</span>
+                <span>{fmtMoney(used, "HKD")} 已用</span>
                 <span>
                   {limit > 0
-                    ? `${Math.round(ratio * 100)}% · 剩 ${fmtHKD(Math.max(limit - used, 0))}`
+                    ? `${Math.round(ratio * 100)}% · 剩 ${fmtMoney(Math.max(limit - used, 0), "HKD")}`
                     : "未設預算"}
                 </span>
               </div>

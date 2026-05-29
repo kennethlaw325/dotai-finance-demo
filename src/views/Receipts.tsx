@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
-import { Camera, FolderOpen, Loader2, Sparkles, Trash2 } from "lucide-react";
+import { Camera, FolderOpen, Loader2, Pencil, Trash2 } from "lucide-react";
 import type { Budget, Receipt } from "../types";
-import { CATEGORIES } from "../types";
 import { extractReceipt, isMockMode } from "../lib/mimo";
-import { fileToDataUrl, fmtHKD, isInCurrentMonth, uid } from "../lib/utils";
+import { fileToDataUrl, fmtMoney, isInCurrentMonth, uid } from "../lib/utils";
 import type { ToastMsg } from "../components/Toast";
+import { ReceiptEditor } from "../components/ReceiptEditor";
 
 interface Props {
   receipts: Receipt[];
@@ -21,11 +21,18 @@ interface BatchProgress {
   fail: number;
 }
 
-export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoToSettings }: Props) {
+export function ReceiptsView({
+  receipts,
+  budgets,
+  setReceipts,
+  pushToast,
+  onGoToSettings
+}: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<Receipt | null>(null);
+  const [editing, setEditing] = useState<Receipt | null>(null);
   const [batch, setBatch] = useState<BatchProgress | null>(null);
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
@@ -35,7 +42,7 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
     if (files.length === 0) return;
     e.target.value = "";
 
-    // Single file → open draft (manual confirm)
+    // Single file → open draft for manual confirm
     if (files.length === 1) {
       setBusy(true);
       try {
@@ -77,16 +84,14 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
       } catch {
         fail += 1;
       }
-      setBatch((cur) =>
-        cur ? { ...cur, done: cur.done + 1, ok, fail } : cur
-      );
+      setBatch((cur) => (cur ? { ...cur, done: cur.done + 1, ok, fail } : cur));
     }
     setReceipts([...newReceipts, ...receipts]);
     setBusy(false);
     setBatch(null);
     pushToast({
       kind: fail === 0 ? "success" : "warn",
-      text: `Batch 完成：${ok} 張入賬${fail ? `，${fail} 張失敗` : ""}`
+      text: `Batch 完成：${ok} 張入賬${fail ? `，${fail} 張失敗（可以按列「✏️」逐張人手修正）` : "，可以按列「✏️」逐張調整"}`
     });
   }
 
@@ -96,7 +101,17 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
     setReceipts(next);
     checkBudgetAlert(draft, next);
     setDraft(null);
-    pushToast({ kind: "success", text: `已記錄 ${draft.merchant} ${fmtHKD(draft.amount)}` });
+    pushToast({
+      kind: "success",
+      text: `已記錄 ${draft.merchant} ${fmtMoney(draft.amount, draft.currency)}`
+    });
+  }
+
+  function saveEdit() {
+    if (!editing) return;
+    setReceipts(receipts.map((r) => (r.id === editing.id ? editing : r)));
+    setEditing(null);
+    pushToast({ kind: "success", text: "已更新" });
   }
 
   function checkBudgetAlert(added: Receipt, all: Receipt[]) {
@@ -109,7 +124,7 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
     if (ratio >= 1) {
       pushToast({
         kind: "danger",
-        text: `🚨 ${added.category} 本月已超支 ${fmtHKD(spent - b.monthlyLimit)}`
+        text: `🚨 ${added.category} 本月已超支 ${fmtMoney(spent - b.monthlyLimit, added.currency)}`
       });
     } else if (ratio >= 0.8) {
       pushToast({
@@ -121,11 +136,12 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
 
   function deleteReceipt(id: string) {
     setReceipts(receipts.filter((r) => r.id !== id));
+    if (editing?.id === id) setEditing(null);
   }
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between">
+      <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-2xl font-semibold">收據</h2>
           <p className="text-muted text-sm mt-1">
@@ -149,7 +165,7 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
             {busy && !batch ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                MiMo 解析中…
+                AI 解析中…
               </>
             ) : (
               <>
@@ -181,7 +197,7 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
           ref={folderInputRef}
           type="file"
           accept="image/*"
-          /* @ts-expect-error non-standard but widely supported in Chromium/Edge/Safari */
+          /* @ts-expect-error non-standard but widely supported */
           webkitdirectory=""
           directory=""
           multiple
@@ -209,11 +225,24 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
       )}
 
       {draft && (
-        <DraftCard
-          draft={draft}
+        <ReceiptEditor
+          title="AI 解析結果（可手動修正）"
+          value={draft}
           onChange={setDraft}
           onSave={saveDraft}
           onCancel={() => setDraft(null)}
+          saveLabel="確認入賬"
+        />
+      )}
+
+      {editing && (
+        <ReceiptEditor
+          title="編輯收據"
+          value={editing}
+          onChange={setEditing}
+          onSave={saveEdit}
+          onCancel={() => setEditing(null)}
+          saveLabel="儲存修改"
         />
       )}
 
@@ -230,7 +259,7 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
             {receipts.map((r) => (
               <div key={r.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-medium truncate">{r.merchant}</span>
                     <span className="text-xs px-1.5 py-0.5 rounded bg-canvas text-muted">
                       {r.category}
@@ -241,14 +270,28 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-muted mt-0.5">{r.date}</div>
+                  <div className="text-xs text-muted mt-0.5">
+                    {r.date}
+                    {r.note && <span className="ml-2">· {r.note}</span>}
+                  </div>
                 </div>
-                <div className="text-right font-mono font-semibold">
-                  {fmtHKD(r.amount)}
+                <div className="text-right">
+                  <div className="font-mono font-semibold">
+                    {fmtMoney(r.amount, r.currency)}
+                  </div>
+                  <div className="text-[10px] text-muted uppercase">{r.currency}</div>
                 </div>
+                <button
+                  onClick={() => setEditing(r)}
+                  className="text-muted hover:text-brand p-1"
+                  title="編輯"
+                >
+                  <Pencil className="size-4" />
+                </button>
                 <button
                   onClick={() => deleteReceipt(r.id)}
                   className="text-muted hover:text-danger p-1"
+                  title="刪除"
                 >
                   <Trash2 className="size-4" />
                 </button>
@@ -258,109 +301,5 @@ export function ReceiptsView({ receipts, budgets, setReceipts, pushToast, onGoTo
         )}
       </section>
     </div>
-  );
-}
-
-function DraftCard({
-  draft,
-  onChange,
-  onSave,
-  onCancel
-}: {
-  draft: Receipt;
-  onChange: (r: Receipt) => void;
-  onSave: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <div className="rounded-xl border border-brand/30 bg-brand/5 p-4">
-      <div className="flex items-center gap-2 text-brand text-sm font-medium mb-3">
-        <Sparkles className="size-4" />
-        MiMo 解析結果（可手動修正）
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4">
-        {draft.imageDataUrl && (
-          <img
-            src={draft.imageDataUrl}
-            alt="receipt"
-            className="rounded-lg border border-line object-cover w-full h-32 md:h-full"
-          />
-        )}
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="商戶">
-            <input
-              value={draft.merchant}
-              onChange={(e) => onChange({ ...draft, merchant: e.target.value })}
-              className="input"
-            />
-          </Field>
-          <Field label="金額">
-            <input
-              type="number"
-              step="0.01"
-              value={draft.amount}
-              onChange={(e) =>
-                onChange({ ...draft, amount: Number(e.target.value) })
-              }
-              className="input"
-            />
-          </Field>
-          <Field label="日期">
-            <input
-              type="date"
-              value={draft.date}
-              onChange={(e) => onChange({ ...draft, date: e.target.value })}
-              className="input"
-            />
-          </Field>
-          <Field label="分類">
-            <select
-              value={draft.category}
-              onChange={(e) =>
-                onChange({ ...draft, category: e.target.value as Receipt["category"] })
-              }
-              className="input"
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </Field>
-          <label className="col-span-2 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={draft.reimbursable}
-              onChange={(e) =>
-                onChange({ ...draft, reimbursable: e.target.checked })
-              }
-            />
-            標記為公司報銷
-          </label>
-        </div>
-      </div>
-      <div className="flex justify-end gap-2 mt-4">
-        <button
-          onClick={onCancel}
-          className="px-3 py-1.5 rounded-lg text-muted hover:bg-canvas"
-        >
-          取消
-        </button>
-        <button
-          onClick={onSave}
-          className="px-4 py-1.5 rounded-lg bg-brand text-white font-medium hover:bg-brand/90"
-        >
-          確認入賬
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1">
-      <span className="text-xs text-muted">{label}</span>
-      {children}
-    </label>
   );
 }

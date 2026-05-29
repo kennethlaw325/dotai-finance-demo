@@ -2,13 +2,20 @@ export function uid(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 }
 
-export function fmtHKD(n: number): string {
-  return new Intl.NumberFormat("zh-HK", {
-    style: "currency",
-    currency: "HKD",
-    minimumFractionDigits: 2
-  }).format(n);
+export function fmtMoney(n: number, currency = "HKD"): string {
+  try {
+    return new Intl.NumberFormat("zh-HK", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2
+    }).format(n);
+  } catch {
+    return `${currency} ${n.toFixed(2)}`;
+  }
 }
+
+// Backwards-compatible alias
+export const fmtHKD = (n: number): string => fmtMoney(n, "HKD");
 
 export function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

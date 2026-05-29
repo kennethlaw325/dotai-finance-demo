@@ -6,7 +6,10 @@ const KEY_BUDGETS = "dotai-finance:budgets";
 export function loadReceipts(): Receipt[] {
   try {
     const raw = localStorage.getItem(KEY_RECEIPTS);
-    return raw ? (JSON.parse(raw) as Receipt[]) : [];
+    if (!raw) return [];
+    const arr = JSON.parse(raw) as Receipt[];
+    // migrate pre-currency rows (default HKD)
+    return arr.map((r) => ({ ...r, currency: r.currency ?? "HKD" }));
   } catch {
     return [];
   }
