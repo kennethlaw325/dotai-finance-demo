@@ -26,7 +26,12 @@ export function ReimbursementsView({ receipts }: { receipts: Receipt[] }) {
           `${r.date},"${r.merchant.replace(/"/g, '""')}",${r.category},${r.currency},${r.amount},"${(r.note ?? "").replace(/"/g, '""')}"`
       )
       .join("\n");
-    const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8" });
+    // Prepend UTF-8 BOM so Excel on Windows / macOS auto-detects encoding
+    // and renders CJK correctly (without BOM Excel falls back to system code
+    // page like Big5/GBK and shows garbage).
+    const blob = new Blob(["﻿", header + rows], {
+      type: "text/csv;charset=utf-8"
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
