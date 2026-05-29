@@ -104,7 +104,7 @@ export default function App() {
       </main>
 
       <footer className="border-t border-line py-3 text-center text-xs text-muted">
-        Dot.ai Codex Level 1 · Finance Demo · MiMo V2.5 Vision
+        Dot.ai Codex Level 1 · Finance Demo · Vision OCR (BYOK)
       </footer>
 
       <ToastStack toasts={toasts} onDismiss={dismissToast} />

@@ -2,16 +2,19 @@ import type { Category, ExtractedReceipt } from "../types";
 import { CATEGORIES } from "../types";
 import { loadMimoConfig } from "./config";
 
-// MiMo Vision OCR client (BYOK — bring your own key)
+// Vision OCR client — provider-agnostic, OpenAI-compatible schema (BYOK).
 //
-// Reads API key from LocalStorage (Settings UI) first, then env vars
-// (VITE_MIMO_API_KEY in .env.local) as dev fallback. If neither set,
-// returns a deterministic mock.
+// Reads API key + baseUrl + model from LocalStorage (Settings UI) first,
+// then env vars (VITE_MIMO_* in .env.local) as dev fallback. If neither
+// set, returns a deterministic mock.
 //
 // Endpoint:  POST {baseUrl}/chat/completions  (OpenAI-compatible)
-// Model:     mimo-v2-omni (only multimodal one — v2.5-pro returns 404
-//            "No endpoints found that support image input")
 // Image:     base64 data URL in user message content[].image_url.url
+//
+// Tested providers:
+//   - OpenAI:       gpt-4o-mini (vision)
+//   - Xiaomi MiMo:  mimo-v2-omni (multimodal; v2.5-pro returns 404 on image)
+//   - OpenRouter:   google/gemini-2.5-flash
 
 const SYSTEM_PROMPT = `你係收據解析助手。輸入係一張收據圖片，請抽取以下欄位並以 JSON 回覆，唔好加任何 markdown 或解釋：
 
@@ -29,7 +32,7 @@ export async function extractReceipt(
 ): Promise<ExtractedReceipt> {
   const { apiKey, baseUrl, model } = loadMimoConfig();
 
-  if (!apiKey) {
+  if (!apiKey || !baseUrl || !model) {
     return mockExtract();
   }
 
@@ -101,5 +104,6 @@ async function mockExtract(): Promise<ExtractedReceipt> {
 }
 
 export function isMockMode(): boolean {
-  return !loadMimoConfig().apiKey;
+  const { apiKey, baseUrl, model } = loadMimoConfig();
+  return !apiKey || !baseUrl || !model;
 }
