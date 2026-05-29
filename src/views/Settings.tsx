@@ -61,15 +61,15 @@ export function SettingsView({
   const activePresetObj = PROVIDER_PRESETS.find((p) => p.label === activePreset);
 
   return (
-    <div className="space-y-10 max-w-2xl">
-      <header>
+    <div className="space-y-10 max-w-2xl mx-auto">
+      <header className="text-center">
         <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
           Section · 04
         </div>
         <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
           Settings
         </h2>
-        <p className="text-muted text-sm mt-3 max-w-md leading-relaxed">
+        <p className="text-muted text-sm mt-3 max-w-md mx-auto leading-relaxed">
           配置 Vision API（OpenAI-compatible schema）。Key 只存喺呢部機。
         </p>
       </header>

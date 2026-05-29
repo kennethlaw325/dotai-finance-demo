@@ -159,27 +159,25 @@ export function ReceiptsView({
 
   return (
     <div className="space-y-10">
-      <header className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
-        <div>
-          <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
-            Section · 01
-          </div>
-          <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
-            Receipts
-          </h2>
-          <p className="text-muted text-sm mt-3 max-w-md leading-relaxed">
-            上傳一張收據，AI 即時解析金額、商戶、貨幣同分類。所有資料留喺呢部機。
-          </p>
-          {isMockMode() && (
-            <button
-              onClick={onGoToSettings}
-              className="mt-3 text-[11px] uppercase tracking-[0.2em] text-warn hover:text-accent transition-colors"
-            >
-              · Mock mode · 加 API key →
-            </button>
-          )}
+      <header className="text-center">
+        <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
+          Section · 01
         </div>
-        <div className="flex items-center gap-3">
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
+          Receipts
+        </h2>
+        <p className="text-muted text-sm mt-3 max-w-md mx-auto leading-relaxed">
+          上傳一張收據，AI 即時解析金額、商戶、貨幣同分類。所有資料留喺呢部機。
+        </p>
+        {isMockMode() && (
+          <button
+            onClick={onGoToSettings}
+            className="block mx-auto mt-3 text-[11px] uppercase tracking-[0.2em] text-warn hover:text-accent transition-colors"
+          >
+            · Mock mode · 加 API key →
+          </button>
+        )}
+        <div className="flex items-center justify-center gap-3 mt-6">
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={busy}

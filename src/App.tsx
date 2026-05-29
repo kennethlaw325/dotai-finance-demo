@@ -67,26 +67,22 @@ export default function App() {
 
   return (
     <div className="min-h-full flex flex-col">
-      <header className="border-b border-line">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8 pt-6 pb-4">
-          <div className="flex items-baseline justify-between gap-4">
-            <div>
-              <div className={`${displayClass} text-ink`}>
-                {isPixel ? "FINANCE.EXE" : "Finance Ledger"}
-              </div>
-              <div className="text-[11px] uppercase tracking-[0.2em] text-muted mt-1">
-                {isPixel ? "v0.1 · DOT.AI" : "Dot.ai · Codex Level 1"}
-              </div>
-            </div>
-            <button
-              onClick={toggleTheme}
-              title={isPixel ? "切去 Luxury theme" : "切去 Pixel theme"}
-              className="text-[11px] uppercase tracking-[0.2em] text-muted hover:text-accent transition-colors"
-            >
-              {isPixel ? "[ luxury ]" : "[ pixel ]"}
-            </button>
+      <header className="border-b border-line relative">
+        <div className="max-w-3xl mx-auto px-5 sm:px-8 pt-6 pb-4 text-center">
+          <button
+            onClick={toggleTheme}
+            title={isPixel ? "切去 Luxury theme" : "切去 Pixel theme"}
+            className="absolute right-5 sm:right-8 top-6 text-[11px] uppercase tracking-[0.2em] text-muted hover:text-accent transition-colors"
+          >
+            {isPixel ? "[ luxury ]" : "[ pixel ]"}
+          </button>
+          <div className={`${displayClass} text-ink`}>
+            {isPixel ? "FINANCE.EXE" : "Finance Ledger"}
           </div>
-          <nav className="mt-6 -mb-px flex items-end gap-6 overflow-x-auto">
+          <div className="text-[11px] uppercase tracking-[0.2em] text-muted mt-1">
+            {isPixel ? "v0.1 · DOT.AI" : "Dot.ai · Codex Level 1"}
+          </div>
+          <nav className="mt-6 -mb-px flex items-end justify-center gap-6 overflow-x-auto">
             {NAV.map((n) => {
               const active = view === n.key;
               return (
@@ -108,7 +104,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-5 sm:px-8 py-10">
+      <main className="flex-1 max-w-3xl w-full mx-auto px-5 sm:px-8 py-10">
         {view === "receipts" && (
           <ReceiptsView
             key={configVersion}
@@ -136,7 +132,7 @@ export default function App() {
       </main>
 
       <footer className="border-t border-line py-5">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8 text-[11px] uppercase tracking-[0.2em] text-muted">
+        <div className="max-w-3xl mx-auto px-5 sm:px-8 text-[11px] uppercase tracking-[0.2em] text-muted text-center">
           Vision OCR · Bring your own key · Data lives in your browser
         </div>
       </footer>

@@ -49,26 +49,26 @@ export function ReimbursementsView({ receipts }: { receipts: Receipt[] }) {
 
   return (
     <div className="space-y-10">
-      <header className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
-        <div>
-          <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
-            Section · 02
-          </div>
-          <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
-            Reimbursable
-          </h2>
-          <p className="text-muted text-sm mt-3 max-w-md leading-relaxed">
-            本月待報銷總額，按貨幣分組以避免換匯誤導。CSV 可直接交財務。
-          </p>
+      <header className="text-center">
+        <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
+          Section · 02
         </div>
-        <button
-          onClick={exportCsv}
-          disabled={items.length === 0}
-          className="flex items-center gap-2 border border-line text-muted px-4 py-2.5 text-sm uppercase tracking-[0.15em] hover:text-ink hover:border-ink disabled:opacity-40 transition-colors"
-        >
-          <Download className="size-4" />
-          Export CSV
-        </button>
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
+          Reimbursable
+        </h2>
+        <p className="text-muted text-sm mt-3 max-w-md mx-auto leading-relaxed">
+          本月待報銷總額，按貨幣分組以避免換匯誤導。CSV 可直接交財務。
+        </p>
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={exportCsv}
+            disabled={items.length === 0}
+            className="flex items-center gap-2 border border-line text-muted px-4 py-2.5 text-sm uppercase tracking-[0.15em] hover:text-ink hover:border-ink disabled:opacity-40 transition-colors"
+          >
+            <Download className="size-4" />
+            Export CSV
+          </button>
+        </div>
       </header>
 
       <section>

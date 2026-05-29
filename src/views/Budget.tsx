@@ -30,14 +30,14 @@ export function BudgetView({ receipts, budgets, setBudgets }: Props) {
 
   return (
     <div className="space-y-10">
-      <header>
+      <header className="text-center">
         <div className="text-[11px] uppercase tracking-[0.25em] text-muted">
           Section · 03
         </div>
         <h2 className="font-display text-3xl sm:text-4xl text-ink mt-2 leading-tight">
           Budget
         </h2>
-        <p className="text-muted text-sm mt-3 max-w-md leading-relaxed">
+        <p className="text-muted text-sm mt-3 max-w-md mx-auto leading-relaxed">
           設定每月分類上限（HKD 基準）。80% 警示，100% 觸發 toast。多幣種混合時數字僅供參考。
         </p>
       </header>
