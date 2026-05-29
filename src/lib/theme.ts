@@ -1,11 +1,19 @@
-export type ThemeKey = "luxury" | "pixel";
+export type ThemeKey = "luxury" | "pixel" | "classic";
+
+export const THEME_KEYS: ThemeKey[] = ["luxury", "pixel", "classic"];
+
+export const THEME_LABELS: Record<ThemeKey, string> = {
+  luxury: "Luxury",
+  pixel: "Pixel",
+  classic: "Classic"
+};
 
 const KEY = "dotai-finance:theme";
 
 export function loadTheme(): ThemeKey {
   try {
     const v = localStorage.getItem(KEY);
-    if (v === "pixel" || v === "luxury") return v;
+    if (v === "pixel" || v === "luxury" || v === "classic") return v;
   } catch {
     /* ignore */
   }

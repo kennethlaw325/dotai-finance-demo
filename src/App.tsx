@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Budget, Receipt } from "./types";
 import { loadBudgets, loadReceipts, saveBudgets, saveReceipts } from "./lib/storage";
-import { loadTheme, saveTheme, type ThemeKey } from "./lib/theme";
+import { THEME_KEYS, THEME_LABELS, loadTheme, saveTheme, type ThemeKey } from "./lib/theme";
 import { ReceiptsView } from "./views/Receipts";
 import { ReimbursementsView } from "./views/Reimbursements";
 import { BudgetView } from "./views/Budget";
@@ -54,33 +54,56 @@ export default function App() {
     setToasts((cur) => cur.filter((t) => t.id !== id));
   }, []);
 
-  function toggleTheme() {
-    const next: ThemeKey = theme === "luxury" ? "pixel" : "luxury";
+  function pickTheme(next: ThemeKey) {
     setTheme(next);
     saveTheme(next);
   }
 
   const isPixel = theme === "pixel";
+  const isClassic = theme === "classic";
   const displayClass = isPixel
     ? "font-display text-[10px] tracking-widest"
+    : isClassic
+    ? "font-sans text-2xl font-semibold tracking-tight"
     : "font-display text-xl tracking-tight";
+
+  const mastheadTitle = isPixel
+    ? "FINANCE.EXE"
+    : isClassic
+    ? "Finance Demo"
+    : "Finance Ledger";
+  const mastheadSubtitle = isPixel
+    ? "v0.1 · DOT.AI"
+    : isClassic
+    ? "Dot.ai Codex Level 1"
+    : "Dot.ai · Codex Level 1";
 
   return (
     <div className="min-h-full flex flex-col">
       <header className="border-b border-line relative">
         <div className="max-w-3xl mx-auto px-5 sm:px-8 pt-6 pb-4 text-center">
-          <button
-            onClick={toggleTheme}
-            title={isPixel ? "切去 Luxury theme" : "切去 Pixel theme"}
-            className="absolute right-5 sm:right-8 top-6 text-[11px] uppercase tracking-[0.2em] text-muted hover:text-accent transition-colors"
-          >
-            {isPixel ? "[ luxury ]" : "[ pixel ]"}
-          </button>
-          <div className={`${displayClass} text-ink`}>
-            {isPixel ? "FINANCE.EXE" : "Finance Ledger"}
+          <div className="absolute right-5 sm:right-8 top-6 flex items-center gap-px border border-line">
+            {THEME_KEYS.map((k) => {
+              const active = theme === k;
+              return (
+                <button
+                  key={k}
+                  onClick={() => pickTheme(k)}
+                  className={`px-2 py-1 text-[10px] uppercase tracking-[0.15em] transition-colors ${
+                    active
+                      ? "bg-accent text-canvas"
+                      : "text-muted hover:text-ink"
+                  }`}
+                  title={`切去 ${THEME_LABELS[k]} theme`}
+                >
+                  {THEME_LABELS[k]}
+                </button>
+              );
+            })}
           </div>
+          <div className={`${displayClass} text-ink`}>{mastheadTitle}</div>
           <div className="text-[11px] uppercase tracking-[0.2em] text-muted mt-1">
-            {isPixel ? "v0.1 · DOT.AI" : "Dot.ai · Codex Level 1"}
+            {mastheadSubtitle}
           </div>
           <nav className="mt-6 -mb-px flex items-end justify-center gap-6 overflow-x-auto">
             {NAV.map((n) => {
