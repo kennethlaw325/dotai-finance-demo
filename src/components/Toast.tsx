@@ -24,10 +24,14 @@ export function ToastStack({
 }
 
 function Toast({ toast, onDismiss }: { toast: ToastMsg; onDismiss: () => void }) {
+  // Depend on toast.id (stable) instead of onDismiss (recreated each parent
+  // render), otherwise the auto-dismiss timer keeps resetting and toasts
+  // never disappear when sibling state churns.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const timer = setTimeout(onDismiss, 4500);
     return () => clearTimeout(timer);
-  }, [onDismiss]);
+  }, [toast.id]);
 
   const tone =
     toast.kind === "success"

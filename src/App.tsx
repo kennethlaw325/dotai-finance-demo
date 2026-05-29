@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Receipt as ReceiptIcon, Building2, Target, Wallet, Settings as SettingsIcon } from "lucide-react";
 import type { Budget, Receipt } from "./types";
 import { loadBudgets, loadReceipts, saveBudgets, saveReceipts } from "./lib/storage";
@@ -38,12 +38,12 @@ export default function App() {
     setBudgetsState(next);
     saveBudgets(next);
   }
-  function pushToast(t: Omit<ToastMsg, "id">) {
+  const pushToast = useCallback((t: Omit<ToastMsg, "id">) => {
     setToasts((cur) => [...cur, { ...t, id: uid() }]);
-  }
-  function dismissToast(id: string) {
+  }, []);
+  const dismissToast = useCallback((id: string) => {
     setToasts((cur) => cur.filter((t) => t.id !== id));
-  }
+  }, []);
 
   return (
     <div className="min-h-full flex flex-col">

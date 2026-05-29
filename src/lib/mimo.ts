@@ -77,7 +77,23 @@ export async function extractReceipt(
 
   const json = await res.json();
   const content = json.choices?.[0]?.message?.content ?? "{}";
-  const parsed = JSON.parse(content);
+
+  // Some models ignore response_format: json_object and wrap output in markdown
+  // fences (```json ... ```), or return prose. Try strict parse; on failure
+  // attempt to extract a JSON object substring; else degrade to defaults.
+  let parsed: Partial<ExtractedReceipt> = {};
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    const match = content.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        parsed = JSON.parse(match[0]);
+      } catch {
+        /* fall through */
+      }
+    }
+  }
 
   return normalize(parsed);
 }

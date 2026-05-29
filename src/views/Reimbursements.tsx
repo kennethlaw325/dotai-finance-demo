@@ -18,12 +18,19 @@ export function ReimbursementsView({ receipts }: { receipts: Receipt[] }) {
     return [...map.entries()];
   }, [items]);
 
+  // CSV formula injection guard: cells starting with = + - @ can be
+  // interpreted as formulas by Excel/LibreOffice. Prefix with single-quote.
+  function csvCell(s: string): string {
+    const safe = /^[=+\-@]/.test(s) ? `'${s}` : s;
+    return `"${safe.replace(/"/g, '""')}"`;
+  }
+
   function exportCsv() {
     const header = "date,merchant,category,currency,amount,note\n";
     const rows = items
       .map(
         (r) =>
-          `${r.date},"${r.merchant.replace(/"/g, '""')}",${r.category},${r.currency},${r.amount},"${(r.note ?? "").replace(/"/g, '""')}"`
+          `${r.date},${csvCell(r.merchant)},${r.category},${r.currency},${r.amount},${csvCell(r.note ?? "")}`
       )
       .join("\n");
     // Prepend UTF-8 BOM so Excel on Windows / macOS auto-detects encoding

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, FolderOpen, Loader2, Pencil, Trash2 } from "lucide-react";
 import type { Budget, Receipt } from "../types";
 import { extractReceipt, isMockMode } from "../lib/mimo";
@@ -34,6 +34,14 @@ export function ReceiptsView({
   const [draft, setDraft] = useState<Receipt | null>(null);
   const [editing, setEditing] = useState<Receipt | null>(null);
   const [batch, setBatch] = useState<BatchProgress | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []).filter((f) =>
@@ -48,6 +56,7 @@ export function ReceiptsView({
       try {
         const dataUrl = await fileToDataUrl(files[0]);
         const extracted = await extractReceipt(dataUrl);
+        if (!mountedRef.current) return;
         setDraft({
           id: uid(),
           ...extracted,
@@ -56,9 +65,10 @@ export function ReceiptsView({
           createdAt: new Date().toISOString()
         });
       } catch (err) {
+        if (!mountedRef.current) return;
         pushToast({ kind: "danger", text: `解析失敗：${(err as Error).message}` });
       } finally {
-        setBusy(false);
+        if (mountedRef.current) setBusy(false);
       }
       return;
     }
@@ -70,6 +80,7 @@ export function ReceiptsView({
     let ok = 0;
     let fail = 0;
     for (const file of files) {
+      if (!mountedRef.current) return;
       try {
         const dataUrl = await fileToDataUrl(file);
         const extracted = await extractReceipt(dataUrl);
@@ -84,8 +95,11 @@ export function ReceiptsView({
       } catch {
         fail += 1;
       }
-      setBatch((cur) => (cur ? { ...cur, done: cur.done + 1, ok, fail } : cur));
+      if (mountedRef.current) {
+        setBatch((cur) => (cur ? { ...cur, done: cur.done + 1, ok, fail } : cur));
+      }
     }
+    if (!mountedRef.current) return;
     setReceipts([...newReceipts, ...receipts]);
     setBusy(false);
     setBatch(null);
@@ -117,19 +131,23 @@ export function ReceiptsView({
   function checkBudgetAlert(added: Receipt, all: Receipt[]) {
     const b = budgets.find((x) => x.category === added.category);
     if (!b || b.monthlyLimit <= 0) return;
-    const spent = all
-      .filter((r) => r.category === added.category && isInCurrentMonth(r.date))
-      .reduce((s, r) => s + r.amount, 0);
+    // Budget is HKD baseline; warn but don't crunch numbers when mixed currencies
+    const monthRows = all.filter(
+      (r) => r.category === added.category && isInCurrentMonth(r.date)
+    );
+    const hasMixed = monthRows.some((r) => r.currency !== "HKD");
+    const spent = monthRows.reduce((s, r) => s + r.amount, 0);
     const ratio = spent / b.monthlyLimit;
+    const suffix = hasMixed ? "（多幣種混合，數字僅供參考）" : "";
     if (ratio >= 1) {
       pushToast({
         kind: "danger",
-        text: `🚨 ${added.category} 本月已超支 ${fmtMoney(spent - b.monthlyLimit, added.currency)}`
+        text: `🚨 ${added.category} 本月已超支 ${fmtMoney(spent - b.monthlyLimit, "HKD")}${suffix}`
       });
     } else if (ratio >= 0.8) {
       pushToast({
         kind: "warn",
-        text: `⚠️ ${added.category} 已用 ${Math.round(ratio * 100)}% 本月預算`
+        text: `⚠️ ${added.category} 已用 ${Math.round(ratio * 100)}% 本月預算${suffix}`
       });
     }
   }
